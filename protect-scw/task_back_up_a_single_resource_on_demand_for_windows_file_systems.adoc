@@ -1,0 +1,210 @@
+---
+permalink: protect-scw/task_back_up_a_single_resource_on_demand_for_windows_file_systems.html 
+sidebar: sidebar 
+keywords: backing up 
+summary: Wenn sich eine Ressource nicht in einer Ressourcengruppe befindet, können Sie die Ressource On Demand auf der Seite Ressourcen sichern. 
+---
+= Bedarfsgerechtes Backup für eine einzelne Ressource für Windows File-Systeme
+:allow-uri-read: 
+:icons: font
+:imagesdir: ../media/
+
+
+[role="lead"]
+Wenn sich eine Ressource nicht in einer Ressourcengruppe befindet, können Sie die Ressource On Demand auf der Seite Ressourcen sichern.
+
+.Über diese Aufgabe
+Wenn Sie eine Ressource mit einer SnapMirror Beziehung zum sekundären Storage sichern möchten, sollte die dem Storage-Benutzer zugewiesene Rolle die Berechtigung „`snapmirror all`“ enthalten. Wenn Sie jedoch die Rolle „`vsadmin`“ verwenden, ist die Berechtigung „`snapmirror all`“ nicht erforderlich.
+
+
+NOTE: Beim Backup eines Dateisystems sichert SnapCenter keine LUNs, die auf einem Volume Mount-Punkt (VMP) in dem gesicherten Dateisystem gemountet sind.
+
+
+IMPORTANT: Wenn Sie in einem Windows-Dateisystemkontext arbeiten, sichern Sie keine Datenbankdateien. Dadurch entsteht ein inkonsistentes Backup und ein möglicher Datenverlust beim Restore. Zum Schutz von Datenbankdateien müssen Sie das entsprechende SnapCenter Plug-in für die Datenbank verwenden (z. B. SnapCenter Plug-in für Microsoft SQL Server, SnapCenter Plug-in für Microsoft Exchange Server oder ein benutzerdefiniertes Plug-in für Datenbankdateien).
+
+[role="tabbed-block"]
+====
+.UI von SnapCenter
+--
+.Schritte
+. Klicken Sie im linken Navigationsbereich auf *Ressourcen* und wählen Sie dann das entsprechende Plug-in aus der Liste aus.
+. Wählen Sie auf der Seite Ressourcen den Ressourcentyp Dateisystem aus, und wählen Sie dann die Ressource aus, die Sie sichern möchten.
+. Wenn der Assistent „Dateisystem – Schutz“ nicht automatisch startet, klicken Sie auf *Schützen*, um den Assistenten zu starten.
++
+Legen Sie die Schutzeinstellungen fest, wie in den Aufgaben zum Erstellen von Ressourcengruppen beschrieben.
+
+. Optional: Geben Sie auf der Seite Ressource des Assistenten ein benutzerdefiniertes Namensformat für den Snapshot ein.
++
+Beispiel: Custtext_resourcegruppe_Policy_hostname oder resourcegruppe_hostname. Standardmäßig wird an den Snapshot Namen ein Zeitstempel angehängt.
+
+. Führen Sie auf der Seite Richtlinien die folgenden Aufgaben aus:
++
+.. Wählen Sie eine oder mehrere Richtlinien aus der Dropdown-Liste aus.
++
+Sie können eine beliebige vorhandene Richtlinie auswählen und dann auf *Details* klicken, um zu bestimmen, ob Sie diese Richtlinie verwenden können.
+
++
+Wenn keine vorhandene Richtlinie Ihren Anforderungen entspricht, können Sie eine vorhandene Richtlinie kopieren und ändern oder Sie können eine neue Richtlinie erstellen, indem Sie auf klicken image:../media/add_policy_from_resourcegroup.gif["Ressourcengruppe für Richtlinienformular hinzufügen"] , um den Richtlinienassistenten zu starten.
+
++
+Die ausgewählten Richtlinien werden in der Spalte Richtlinie im Abschnitt „Zeitpläne für ausgewählte Richtlinien konfigurieren“ aufgeführt.
+
+.. Klicken Sie im Abschnitt Configure Schedules for Selected Policies in der Spalte Configure Schedules für die Richtlinie, für die Sie den Zeitplan konfigurieren möchten, auf image:../media/add_policy_from_resourcegroup.gif["Richtlinie aus Ressourcengruppe hinzufügen"] .
+.. Konfigurieren Sie den Zeitplan im Dialogfeld Add Schedules for Policy_Name_, indem Sie das Startdatum, das Ablaufdatum und die Häufigkeit angeben und dann auf *Finish* klicken.
++
+Die konfigurierten Zeitpläne werden in der Spalte „angewendete Zeitpläne“ im Abschnitt „Zeitpläne für ausgewählte Richtlinien konfigurieren“ aufgeführt.
+
++
+https://kb.netapp.com/Advice_and_Troubleshooting/Data_Protection_and_Security/SnapCenter/Scheduled_data_protection_operations_fail_if_the_number_of_operations_running_reaches_maximum_limit["Geplante Vorgänge können fehlschlagen"]
+
+
+
+. Führen Sie auf der Seite Benachrichtigung die folgenden Aufgaben aus:
++
+|===
+| Für dieses Feld... | Tun Sie das... 
+
+
+ a| 
+E-Mail-Präferenz
+ a| 
+Wählen Sie * immer* oder *bei Ausfall* oder *bei Fehlschlag oder Warnung* aus, um E-Mails an Empfänger zu senden, nachdem Sie Backup-Ressourcengruppen erstellt, Richtlinien angehängt und Zeitpläne konfiguriert haben.
+
+Geben Sie die SMTP-Serverinformationen, die Standard-E-Mail-Betreffzeile und die E-Mail-Adressen „`bis`“ und „`von`“ ein.
+
+
+
+ a| 
+Von
+ a| 
+E-Mail-Adresse
+
+
+
+ a| 
+Bis
+ a| 
+E-Mail-Adresse
+
+
+
+ a| 
+Betreff
+ a| 
+Standard-E-Mail-Betreffzeile
+
+|===
+. Überprüfen Sie die Zusammenfassung und klicken Sie dann auf *Fertig stellen*.
++
+Die Seite der Datenbanktopologie wird angezeigt.
+
+. Klicken Sie auf *Jetzt sichern*.
+. Führen Sie auf der Seite Backup die folgenden Schritte aus:
++
+.. Wenn Sie mehrere Richtlinien auf die Ressource angewendet haben, wählen Sie aus der Dropdown-Liste Richtlinie die Richtlinie aus, die Sie für das Backup verwenden möchten.
++
+Wenn die für das On-Demand-Backup ausgewählte Richtlinie einem Backup-Zeitplan zugeordnet ist, werden die On-Demand-Backups auf Basis der für den Zeitplantyp festgelegten Aufbewahrungseinstellungen beibehalten.
+
+.. Klicken Sie Auf *Backup*.
+
+
+. Überwachen Sie den Fortschritt des Vorgangs, indem Sie auf *Monitor* > *Jobs* klicken.
+
+
+--
+.PowerShell Commandlets
+--
+.Schritte
+. Starten Sie eine Verbindungssitzung mit dem SnapCenter-Server für einen bestimmten Benutzer, indem Sie das Cmdlet "Open-SmConnection" verwenden.
++
+[listing]
+----
+Open-smconnection  -SMSbaseurl  https://snapctr.demo.netapp.com:8146
+----
++
+Die Eingabeaufforderung für Benutzername und Passwort wird angezeigt.
+
+. Erstellen Sie mithilfe des Cmdlet "Add-SmPolicy" eine Backup-Richtlinie.
++
+Dieses Beispiel erstellt eine neue Backup-Richtlinie mit einem SQL Backup-Typ von FullBackup:
+
++
+[listing]
+----
+PS C:\> Add-SmPolicy -PolicyName TESTPolicy
+-PluginPolicyType SCSQL -PolicyType Backup
+-SqlBackupType FullBackup -Verbose
+----
++
+In diesem Beispiel wird eine neue Backup-Richtlinie mit einem Backup-Typ von CrashConsistent für Windows File-Systeme erstellt:
+
++
+[listing]
+----
+PS C:\> Add-SmPolicy -PolicyName FileSystemBackupPolicy
+-PluginPolicyType SCW -PolicyType Backup
+-ScwBackupType CrashConsistent -Verbose
+----
+. Ermitteln Sie Host-Ressourcen mit dem Cmdlet "Get-SmResources".
++
+Dieses Beispiel ermittelt die Ressourcen für das Microsoft SQL Plug-in auf dem angegebenen Host:
+
++
+[listing]
+----
+C:\PS>PS C:\> Get-SmResources -HostName vise-f6.sddev.mycompany.com
+-PluginCode SCSQL
+----
++
+In diesem Beispiel werden Ressourcen für Windows File-Systeme auf dem angegebenen Host ermittelt:
+
++
+[listing]
+----
+C:\PS>PS C:\> Get-SmResources -HostName vise2-f6.sddev.mycompany.com
+-PluginCode SCW
+----
+. Fügen Sie mit dem Cmdlet "Add-SmResourceGroup" eine neue Ressourcengruppe zu SnapCenter hinzu.
++
+In diesem Beispiel wird eine neue Ressourcengruppe für die Sicherung von SQL-Datenbanken mit der angegebenen Richtlinie und den angegebenen Ressourcen erstellt:
+
++
+[listing]
+----
+PS C:\> Add-SmResourceGroup -ResourceGroupName AccountingResource
+-Resources @{"Host"="visef6.org.com";
+"Type"="SQL Database";"Names"="vise-f6\PayrollDatabase"}
+-Policies "BackupPolicy"
+----
++
+Dieses Beispiel erstellt eine neue Windows Dateisystem-Backup-Ressourcengruppe mit der angegebenen Richtlinie und Ressourcen:
+
++
+[listing]
+----
+PS C:\> Add-SmResourceGroup -ResourceGroupName EngineeringResource
+-PluginCode SCW -Resources @{"Host"="WIN-VOK20IKID5I";
+"Type"="Windows Filesystem";"Names"="E:\"}
+-Policies "EngineeringBackupPolicy"
+----
+. Initiieren Sie einen neuen Sicherungsauftrag mit dem Cmdlet "New-SmBackup".
++
+[listing]
+----
+PS C:> New-SmBackup -ResourceGroupName PayrollDataset -Policy FinancePolicy
+----
+. Zeigen Sie den Status des Backup-Jobs mit dem Cmdlet "Get-SmBackupReport" an.
++
+In diesem Beispiel wird ein Job-Summary-Bericht aller Jobs angezeigt, die am angegebenen Datum ausgeführt wurden:
+
++
+[listing]
+----
+PS C:\> Get-SmJobSummaryReport -Date '1/27/2016'
+----
+
+
+Die Informationen zu den Parametern, die mit dem Cmdlet und deren Beschreibungen verwendet werden können, können durch Ausführen von _get-Help Command_Name_ abgerufen werden. Alternativ können Sie auch auf die https://docs.netapp.com/us-en/snapcenter-cmdlets/index.html["SnapCenter Software Cmdlet Referenzhandbuch"^].
+
+--
+====

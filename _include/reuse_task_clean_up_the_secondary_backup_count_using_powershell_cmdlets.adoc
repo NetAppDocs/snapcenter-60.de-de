@@ -1,0 +1,30 @@
+= 
+:allow-uri-read: 
+
+
+Sie können das Cmdlet "Remove-SmBackup" verwenden, um die Anzahl der Backups für sekundäre Backups zu bereinigen, die keinen Snapshot haben. Sie können dieses Cmdlet verwenden, wenn die in der Topologie zum Verwalten von Kopien angezeigten Snapshots insgesamt nicht mit der Einstellung für die Aufbewahrung von sekundären SpeicherSnapshot übereinstimmen.
+
+Sie müssen die PowerShell Umgebung vorbereitet haben, um die PowerShell Cmdlets auszuführen.
+
+Die Informationen zu den Parametern, die mit dem Cmdlet und deren Beschreibungen verwendet werden können, können durch Ausführen von _get-Help Command_Name_ abgerufen werden. Alternativ können Sie auch auf die https://docs.netapp.com/us-en/snapcenter-cmdlets/index.html["SnapCenter Software Cmdlet Referenzhandbuch"^].
+
+.Schritte
+. Starten Sie eine Verbindungssitzung mit dem SnapCenter-Server für einen bestimmten Benutzer, indem Sie das Cmdlet "Open-SmConnection" verwenden.
++
+[listing]
+----
+Open-SmConnection  -SMSbaseurl  https:\\snapctr.demo.netapp.com:8146/
+----
+. Bereinigen Sie die Anzahl der sekundären Backups mit dem Parameter -CleanupSecondaryBackups.
++
+In diesem Beispiel wird die Anzahl der Backups für sekundäre Backups ohne Snapshots bereinigt:
+
++
+[listing]
+----
+Remove-SmBackup -CleanupSecondaryBackups
+Remove-SmBackup
+Are you sure want to remove the backup(s).
+[Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "Y"):
+----
+

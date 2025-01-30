@@ -1,0 +1,335 @@
+---
+permalink: protect-sce/task_create_backup_policies_for_exchange_server_databases.html 
+sidebar: sidebar 
+keywords: SnapCenter plug-in for Exchange Server 
+summary: Sie können eine Backup-Richtlinie für die Exchange-Ressourcen oder für die Ressourcengruppen erstellen, bevor Sie SnapCenter zum Sichern von Microsoft Exchange Server-Ressourcen verwenden. Alternativ können Sie beim Erstellen einer Ressourcengruppen oder beim Backup einer einzelnen Ressource eine Backup-Richtlinie erstellen. 
+---
+= Erstellen von Backup-Richtlinien für Exchange Server-Datenbanken
+:allow-uri-read: 
+:icons: font
+:imagesdir: ../media/
+
+
+[role="lead"]
+Sie können eine Backup-Richtlinie für die Exchange-Ressourcen oder für die Ressourcengruppen erstellen, bevor Sie SnapCenter zum Sichern von Microsoft Exchange Server-Ressourcen verwenden. Alternativ können Sie beim Erstellen einer Ressourcengruppen oder beim Backup einer einzelnen Ressource eine Backup-Richtlinie erstellen.
+
+.Bevor Sie beginnen
+* Sie müssen Ihre Datensicherungsstrategie definiert haben.
++
+Weitere Informationen finden Sie in den Informationen zur Definition einer Datensicherungsstrategie für Exchange Datenbanken.
+
+* Sie müssen auf die Datensicherung vorbereitet sein, indem Sie Aufgaben wie das Installieren von SnapCenter, das Hinzufügen von Hosts, die Identifizierung von Ressourcen und das Erstellen von Verbindungen zum Storage-System abschließen.
+* Sie müssen die Exchange Server-Ressourcen aktualisiert (erkannt) haben.
+* Wenn Sie Snapshots auf eine Spiegelung oder einen Vault replizieren, muss der SnapCenter Administrator Ihnen die Storage Virtual Machines (SVMs) sowohl für die Quell-Volumes als auch für die Ziel-Volumes zugewiesen haben.
+* Wenn Sie die PowerShell-Skripte in Verordnungen und Postskripten ausführen möchten, sollten Sie den Wert des Parameters in der Datei auf true setzen `usePowershellProcessforScripts` `web.config` .
++
+Der Standardwert ist false.
+
+* Prüfen Sie die spezifischen Voraussetzungen und Einschränkungen von SnapMirror Active Sync. Weitere Informationen finden Sie unter https://docs.netapp.com/us-en/ontap/smbc/considerations-limits.html#volumes["Objektgrenzen für die aktive SnapMirror Synchronisierung"].
+
+
+.Über diese Aufgabe
+* Eine Backup-Richtlinie ist eine Reihe von Regeln, die festlegen, wie Backups gemanagt und aufbewahrt werden und wie oft die Ressourcen- oder Ressourcengruppe gesichert wird. Außerdem können Sie Skripteinstellungen festlegen. Durch das Festlegen von Optionen in einer Richtlinie wird Zeit eingespart, wenn die Richtlinie für eine andere Ressourcengruppe wiederverwendet werden soll.
+* Eine vollständige Backup-Aufbewahrung ist spezifisch für eine bestimmte Richtlinie. Eine Datenbank oder Ressource, die Richtlinien A mit einer vollständigen Backup-Aufbewahrung von 4 verwendet, behält 4 volle Backups bei und hat keine Auswirkungen auf Richtlinie B für die gleiche Datenbank oder Ressource, die möglicherweise eine Aufbewahrung von 3 haben, um 3 vollständige Backups aufzubewahren.
+* Die Backup-Aufbewahrung von Protokollen ist über alle Richtlinien hinweg wirksam und wird für alle Backup-Protokollierung einer Datenbank oder Ressource angewendet. Wenn ein vollständiges Backup mit Richtlinie B durchgeführt wird, wirkt sich die Einstellung für die Protokollaufbewahrung auf die von Richtlinie A erstellten Protokoll-Backups in derselben Datenbank oder Ressource aus. Ebenso wirkt sich die Einstellung für die Protokollaufbewahrung für Policy A auf die von Richtlinie B erstellten Protokoll-Backups in derselben Datenbank aus.
+* DER SCRIPTS_PATH wird mit dem PredefinedWindowsScriptDirectory-Schlüssel definiert, der sich in der SMCoreServiceHost.exe.Config-Datei des Plug-in-Hosts befindet.
++
+Bei Bedarf können Sie diesen Pfad ändern und den SMCore Service neu starten. Es wird empfohlen, den Standardpfad für die Sicherheit zu verwenden.
+
++
+Der Wert des Schlüssels kann von Swagger über die API angezeigt werden: API /4.7/configsettings
+
++
+Sie können die GET API verwenden, um den Wert der Taste anzuzeigen. SET-API wird nicht unterstützt.
+
++
+|===
+
+
+| *Best Practice:* Es ist am besten, dass Sie die sekundäre Aufbewahrungsrichtlinie auf der Grundlage der Anzahl der vollständigen und Log-Backups insgesamt konfigurieren, die Sie behalten möchten. Wenn Sie sekundäre Aufbewahrungsrichtlinien konfigurieren, beachten Sie, dass bei Datenbanken und Protokollen, die sich auf verschiedenen Volumes befinden, jedes Backup drei Snapshots haben kann. Wenn sich Datenbanken und Protokolle auf demselben Volume befinden, kann jedes Backup zwei Snapshots haben. 
+|===
+* SnapLock
++
+** Wenn die Option „Backup-Kopien für eine bestimmte Anzahl von Tagen aufbewahren“ ausgewählt ist, muss die SnapLock Aufbewahrungsfrist kleiner oder gleich den genannten Aufbewahrungstagen sein.
++
+Wenn Sie eine Snapshot-Sperrfrist festlegen, wird das Löschen der Snapshots bis zum Ablauf der Aufbewahrungsfrist verhindert. Dies kann dazu führen, dass eine größere Anzahl von Snapshots beibehalten wird als in der Richtlinie angegeben.
+
++
+Bei ONTAP 9.12.1 und älteren Versionen übernehmen die über die SnapLock Vault Snapshots erstellten Klone die Verfallszeit von SnapLock Vault. Der Storage-Administrator sollte die Klone nach Ablauf der SnapLock-Gültigkeitsdauer manuell bereinigen.
+
++
+
+NOTE: Die primären SnapLock-Einstellungen werden in der SnapCenter Backup Policy gemanagt, und die sekundären SnapLock-Einstellungen werden von ONTAP gemanagt.
+
+
+
+
+
+.Schritte
+. Klicken Sie im linken Navigationsbereich auf *Einstellungen*.
+. Klicken Sie auf der Seite Einstellungen auf *Richtlinien*.
+. Klicken Sie Auf *Neu*.
+. Geben Sie auf der Seite Name den Namen und die Beschreibung der Richtlinie ein.
+. Führen Sie auf der Seite Sicherungstyp die folgenden Schritte durch:
++
+.. Wählen Sie den Sicherungstyp:
++
+|===
+| Ihr Ziel ist | Tun Sie das... 
+
+
+ a| 
+Sichern Sie die Datenbankdateien und die erforderlichen Transaktions-Logs
+ a| 
+Wählen Sie *Vollbackup und Log Backup* aus.
+
+Datenbanken werden durch Log-Verkürzung gesichert und alle Protokolle werden gesichert, einschließlich der gekürzten Protokolle.
+
+
+NOTE: Dies ist der empfohlene Backup-Typ.
+
+
+
+ a| 
+Sichern Sie die Datenbankdateien und die nicht gesicherten Transaktionsprotokolle
+ a| 
+Wählen Sie * Vollbackup* aus.
+
+Datenbanken werden durch Log-Verkürzung gesichert, gekürzte Protokolle werden nicht gesichert.
+
+
+
+ a| 
+Sichern Sie alle Transaktions-Logs
+ a| 
+Wählen Sie *Backup protokollieren*.
+
+Alle Transaktions-Logs auf dem aktiven File-System werden gesichert, und es gibt keine Log-Verkürzung.
+
+Ein Verzeichnis _sceBackupinfo_ wird auf derselben Festplatte erstellt wie das Live Log. Dieses Verzeichnis enthält den Zeiger auf die inkrementellen Änderungen für die Exchange-Datenbank und entspricht nicht den vollständigen Log-Dateien.
+
+
+
+ a| 
+Sichern Sie alle Datenbank- und Transaktions-Logs, ohne die Transaktions-Log-Dateien zu beeinträchtigen
+ a| 
+Wählen Sie *Backup Kopieren*.
+
+Alle Datenbanken und Protokolle werden gesichert, und es gibt keine Log-Verkürzung. In der Regel verwenden Sie diesen Backup-Typ für das erneutes Seeding einer Kopie oder zum Testen oder zur Diagnose eines Problems.
+
+|===
++
+
+NOTE: Sie sollten den für die Protokoll-Backups benötigten Speicherplatz basierend auf der vollständigen Backup-Aufbewahrung definieren, nicht auf der Grundlage einer up-to-the-minute-Aufbewahrung (UTM).
+
++
+
+NOTE: Erstellen Sie beim Umgang mit Exchange Volumes (LUNs) separate Vault-Richtlinien für Protokolle und Datenbanken, und setzen Sie die Keep (Retention) für die Protokollrichtlinie auf die doppelte Anzahl für jedes Label wie die Datenbankrichtlinie unter Verwendung derselben Labels. Weitere Informationen finden Sie unter: https://kb.netapp.com/Advice_and_Troubleshooting/Data_Protection_and_Security/SnapCenter/SnapCenter_for_Exchange_Backups_only_keep_half_the_Snapshots_on_the_Vault_destination_log_volume["Bei Backups mit SnapCenter für Exchange wird nur die Hälfte der Snapshots auf dem Ziel-Log-Volume von Vault gespeichert"^]
+
+.. Wählen Sie im Abschnitt Einstellungen für Datenbankverfügbarkeitsgruppen eine Aktion aus:
++
+|===
+| Für dieses Feld... | Tun Sie das... 
+
+
+ a| 
+Sichern Sie aktive Kopien
+ a| 
+Wählen Sie diese Option aus, um nur die aktiven Kopien der ausgewählten Datenbank zu sichern.
+
+Bei Datenbankverfügbarkeitsgruppen (Database Availability Groups, DAGs) werden mit dieser Option nur aktive Kopien aller Datenbanken in der DAG gesichert.
+
+Passive Kopien werden nicht gesichert.
+
+
+
+ a| 
+Sichern Sie Kopien auf Servern, die zum Erstellungszeitpunkt des Backup-Jobs ausgewählt werden sollen
+ a| 
+Wählen Sie diese Option aus, um alle Kopien der Datenbanken auf den ausgewählten Servern zu sichern, sowohl aktiv als auch passiv.
+
+Bei DAGs sichert diese Option sowohl aktive als auch passive Kopien aller Datenbanken auf den ausgewählten Servern.
+
+|===
++
+
+NOTE: Bei Cluster-Konfigurationen werden die Backups entsprechend den in der Richtlinie festgelegten Aufbewahrungseinstellungen auf jedem Node des Clusters aufbewahrt. Wenn sich der Owner-Node des Clusters ändert, werden die Backups des vorherigen Owner-Node beibehalten. Die Aufbewahrung gilt nur auf Node-Ebene.
+
+.. Wählen Sie im Abschnitt Terminfrequenz einen oder mehrere der Frequenztypen aus: *On Demand*, *hourly*, *Daily*, *Weekly* und *Monthly*.
++
+
+NOTE: Sie können den Zeitplan (Startdatum, Enddatum) für Sicherungsvorgänge beim Erstellen einer Ressourcengruppe angeben. So können Sie Ressourcengruppen erstellen, die dieselben Richtlinien- und Backup-Häufigkeit verwenden, aber Sie können jeder Richtlinie verschiedene Backup-Zeitpläne zuweisen.
+
++
+
+NOTE: Wenn Sie für 2:00 Uhr geplant sind, wird der Zeitplan während der Sommerzeit (DST) nicht ausgelöst.
+
+
+
+. Konfigurieren Sie auf der Seite Aufbewahrung die Aufbewahrungseinstellungen.
++
+Die angezeigten Optionen hängen vom Backup-Typ und vom Frequenztyp ab, den Sie zuvor ausgewählt haben.
+
++
+
+NOTE: Der maximale Aufbewahrungswert ist 1018 für Ressourcen auf ONTAP 9.4 oder höher und 254 für Ressourcen unter ONTAP 9.3 oder einer früheren Version. Backups schlagen fehl, wenn die Aufbewahrung auf einen Wert festgelegt ist, der höher ist, als die zugrunde liegende ONTAP Version unterstützt.
+
++
+
+IMPORTANT: Sie müssen die Aufbewahrungsanzahl auf 2 oder höher einstellen, wenn Sie die SnapVault-Replikation aktivieren möchten. Wenn Sie den Aufbewahrungszeitraum auf 1 festlegen, kann der Aufbewahrungsvorgang fehlschlagen, weil der erste Snapshot der ReferenzSnapshot für die SnapVault-Beziehung ist, bis ein neuerer Snapshot auf das Ziel repliziert wird.
+
++
+.. Wählen Sie im Abschnitt Einstellungen für die Aufbewahrung von Protokollsicherungen eine der folgenden Optionen aus:
++
+|===
+| Ihr Ziel ist | Tun Sie das... 
+
+
+ a| 
+Bewahren Sie nur eine bestimmte Anzahl von Protokoll-Backups auf
+ a| 
+Wählen Sie *Anzahl der vollständigen Backups, für die Protokolle aufbewahrt werden*, und geben Sie die Anzahl der vollständigen Backups an, für die Sie eine zeitnahe Wiederherstellung wünschen.
+
+Die up-to-the-minute (UTM) Aufbewahrung gilt für die Protokollierung der Backups, die über vollständige Backups oder das Log-Backup erstellt wurden. Wenn die UTM-Aufbewahrungseinstellungen beispielsweise so konfiguriert sind, dass die Protokollsicherungen der letzten 5 vollständigen Backups gespeichert werden, werden die Protokoll-Backups der letzten 5 vollständigen Backups beibehalten.
+
+Die im Rahmen der vollständigen und der Log-Backups erstellten Protokollordner werden automatisch als Teil von UTM gelöscht. Sie können die Protokollordner nicht manuell löschen. Wenn z. B. die Aufbewahrungseinstellung für vollständige oder vollständige Backup und Log-Sicherung für einen Monat festgelegt ist und die UTM-Aufbewahrung auf 10 Tage festgelegt ist, wird der im Rahmen dieser Backups erstellte Log-Ordner wie pro UTM gelöscht. Dadurch sind nur 10 Tage Protokollordner vorhanden und alle anderen Backups sind für die Point-in-Time-Wiederherstellung markiert.
+
+Sie können den UTM-Aufbewahrungswert auf 0 einstellen, wenn Sie keine minutengenaue Wiederherstellung durchführen möchten. Dies ermöglicht den Point-in-Time Restore-Vorgang.
+
+*Best Practice:* Es ist am besten, dass die Einstellung gleich der Einstellung für Total Snapshots (Full Backups) im Abschnitt Full Backup Retention Settings sein muss. Dadurch wird sichergestellt, dass Protokolldateien für jedes vollständige Backup aufbewahrt werden.
+
+
+
+ a| 
+Bewahren Sie die Backup-Kopien für eine bestimmte Anzahl von Tagen auf
+ a| 
+Wählen Sie die Option *Protokollsicherungen für letzte* aufbewahren und geben Sie die Anzahl der Tage an, um die Backup-Kopien des Protokolls zu behalten.
+
+Aufbewahrung der Log-Backups bis zur Anzahl von Tagen voller Backups.
+
+
+
+ a| 
+Sperrfrist von Snapshots
+ a| 
+Wählen Sie *Sperrfrist der Snapshot-Kopie* aus und wählen Sie Tage, Monate oder Jahre aus.
+
+Die SnapLock-Aufbewahrungsfrist sollte weniger als 100 Jahre betragen.
+
+|===
++
+Wenn Sie als Backup-Typ *Log Backup* ausgewählt haben, werden Log-Backups als Teil der up-to-the-minute-Aufbewahrungseinstellungen für vollständige Backups beibehalten.
+
+.. Wählen Sie im Abschnitt Einstellungen für vollständige Backups eine der folgenden Optionen für On-Demand-Backups aus, und wählen Sie dann eine für vollständige Backups aus:
++
+|===
+| Für dieses Feld... | Tun Sie das... 
+
+
+ a| 
+Bewahren Sie nur eine bestimmte Anzahl von Snapshots auf
+ a| 
+Wenn Sie die Anzahl der vollständigen Backups angeben möchten, die beibehalten werden sollen, wählen Sie die Option *Total Snapshot Copies to keep* aus, und geben Sie die Anzahl der Snapshots (Full Backups) an, die beibehalten werden sollen.
+
+Wenn die Anzahl der vollständigen Backups die angegebene Anzahl überschreitet, werden die vollständigen Backups, die die angegebene Anzahl überschreiten, gelöscht, wobei die ältesten Kopien zuerst gelöscht werden.
+
+
+
+ a| 
+Bewahren Sie vollständige Backups für eine bestimmte Anzahl an Tagen auf
+ a| 
+Wählen Sie die Option *Snapshot Kopien behalten für* und geben Sie die Anzahl der Tage an, die Snapshots behalten werden sollen (vollständige Backups).
+
+
+
+ a| 
+Sperrfrist von Snapshots
+ a| 
+Wählen Sie *Sperrfrist der Snapshot-Kopie* aus und wählen Sie Tage, Monate oder Jahre aus.
+
+Die SnapLock-Aufbewahrungsfrist sollte weniger als 100 Jahre betragen.
+
+|===
++
+Wenn Sie eine Datenbank mit nur Protokollsicherungen und keinen vollständigen Backups auf einem Host in einer DAG-Konfiguration haben, werden die Protokoll-Backups auf folgende Weise beibehalten:
+
++
+*** Standardmäßig findet SnapCenter auf allen anderen Hosts in der DAG das älteste volle Backup dieser Datenbank und löscht alle Log-Backups auf diesem Host, die vor dem vollständigen Backup erstellt wurden.
+*** Sie können das oben genannte Standard-Aufbewahrungsverhalten für eine Datenbank auf einem Host in einer DAG mit nur Protokoll-Backups überschreiben, indem Sie den Schlüssel *MaxLogBackupOnlyCountWithfullBackup* in der Datei _C:\Programme\NetApp\SnapCenter WebApp\Web.config_ hinzufügen.
++
+ <add key="MaxLogBackupOnlyCountWithoutFullBackup" value="10">
++
+Im Beispiel bedeutet der Wert 10, dass Sie bis zu 10 Log-Backups auf dem Host aufbewahren.
+
+
+
+
+
+. Wählen Sie auf der Seite Replikation eine oder beide der folgenden sekundären Replikationsoptionen aus:
++
+|===
+| Für dieses Feld... | Tun Sie das... 
+
+
+ a| 
+Aktualisieren Sie SnapMirror nach dem Erstellen eines lokalen Snapshots
+ a| 
+Wählen Sie diese Option aus, um Spiegelkopien von Backup-Sets auf einem anderen Volume (SnapMirror) zu behalten.
+
+Während der sekundären Replizierung wird mit der SnapLock-Ablaufzeit die primäre SnapLock-Ablaufzeit geladen.
+
+Diese Option sollte für SnapMirror Active Sync aktiviert sein.
+
+
+IMPORTANT: Die nur-Primärrichtlinie kann nicht verwendet werden, wenn SnapMirror Active Sync für Exchange ONTAP Volumes eingerichtet ist. SnapCenter lässt dies nicht zu. Sie sollten die Option „Spiegeln“ aktivieren.
+
+Durch Klicken auf die Schaltfläche * Aktualisieren* auf der Seite Topologie wird die sekundäre und primäre SnapLock-Ablaufzeit aktualisiert, die von ONTAP abgerufen werden.
+
+Siehe link:../protect-sce/task_view_exchange_backups_in_the_topology_page.html["Zeigen Sie Exchange-Backups auf der Seite Topologie an"].
+
+
+
+ a| 
+Aktualisieren Sie SnapVault nach dem Erstellen eines lokalen Snapshots
+ a| 
+Wählen Sie diese Option aus, um die Disk-to-Disk-Backup-Replikation durchzuführen.
+
+
+
+ a| 
+Sekundäres Policy-Label
+ a| 
+Wählen Sie eine Snapshot-Bezeichnung aus.
+
+Je nach der ausgewählten Snapshot-Beschriftung wendet ONTAP die sekundäre Snapshot-Aufbewahrungsrichtlinie an, die der Markierung entspricht.
+
+
+NOTE: Wenn Sie *Update SnapMirror nach dem Erstellen einer lokalen Snapshot Kopie* ausgewählt haben, können Sie optional das Label für die sekundäre Richtlinie angeben. Wenn Sie jedoch *Update SnapVault nach dem Erstellen einer lokalen Snapshot Kopie* ausgewählt haben, sollten Sie das sekundäre Policy Label angeben.
+
+
+
+ a| 
+Fehler bei Wiederholungszählung
+ a| 
+Geben Sie die Anzahl der Replikationsversuche ein, die vor dem Anhalten des Prozesses auftreten sollen.
+
+|===
++
+
+NOTE: Sie sollten die SnapMirror Aufbewahrungsrichtlinie in ONTAP für den sekundären Storage konfigurieren, um die maximale Grenze von Snapshots auf dem sekundären Storage zu vermeiden.
+
+. Geben Sie auf der Seite Skript den Pfad und die Argumente des Vorskripts bzw. des Postskripts ein, die vor bzw. nach dem Backup ausgeführt werden sollen.
++
+** Zu den vorkript-Backup-Argumenten gehören „` USD Datenbank`“ und „` USD ServerInstance`“.
+** Zu den PostScript-Backup-Argumenten gehören „` USD Datenbank`“, „` USD ServerInstance`“, „` USD BackupName`“, „` USD LogDirectory`“ und „` USD LogSnapshot`“.
++
+Sie können ein Skript ausführen, um SNMP-Traps zu aktualisieren, Warnmeldungen zu automatisieren, Protokolle zu senden usw.
+
++
+
+NOTE: Der Pfad für Prescripts oder Postscripts darf keine Laufwerke oder Shares enthalten. Der Pfad sollte relativ zum SCRIPTS_PATH sein.
+
+
+
+. Überprüfen Sie die Zusammenfassung und klicken Sie dann auf *Fertig stellen*.
+

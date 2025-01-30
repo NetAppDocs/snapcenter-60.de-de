@@ -1,0 +1,115 @@
+---
+permalink: protect-scu/task_create_backup_policies_for_unix_file_systems.html 
+sidebar: sidebar 
+keywords: backup policies, policies, unix file systems, file systems 
+summary: Erstellen Sie eine Sicherungsrichtlinie für die Unix-Dateisysteme, die Sie sichern möchten. 
+---
+= Erstellen Sie Backup-Richtlinien für Unix-Dateisysteme
+:allow-uri-read: 
+:icons: font
+:imagesdir: ../media/
+
+
+[role="lead"]
+Bevor Sie SnapCenter zum Sichern von Unix-Dateisystemen verwenden, müssen Sie eine Sicherungsrichtlinie für die Ressource oder die Ressourcengruppe erstellen, die Sie sichern möchten. Eine Backup-Richtlinie ist eine Reihe von Regeln, die das Managen, Planen und Aufbewahren von Backups regeln. Sie können auch die Einstellungen für Replikation, Skript und Backup-Typ festlegen. Das Erstellen einer Richtlinie spart Zeit, wenn Sie die Richtlinie für eine andere Ressource oder Ressourcengruppe wiederverwenden möchten.
+
+.Bevor Sie beginnen
+* Sie müssen sich auf die Datensicherung vorbereitet haben, indem Sie Aufgaben wie das Installieren von SnapCenter, das Hinzufügen von Hosts, das Erkennen der Dateisysteme und das Erstellen von Storage-System-Verbindungen durchführen.
+* Wenn Sie Snapshots auf einen sekundären gespiegelten oder Vault-Storage replizieren, muss Ihnen der SnapCenter Administrator die SVMs sowohl für die Quell- als auch für die Ziel-Volumes zugewiesen haben.
+* Prüfen Sie die spezifischen Voraussetzungen und Einschränkungen von SnapMirror Active Sync. Weitere Informationen finden Sie unter https://docs.netapp.com/us-en/ontap/smbc/considerations-limits.html#volumes["Objektgrenzen für die aktive SnapMirror Synchronisierung"].
+
+
+.Schritte
+. Klicken Sie im linken Navigationsbereich auf *Einstellungen*.
+. Klicken Sie auf der Seite Einstellungen auf *Richtlinien*.
+. Wählen Sie *Unix File Systems* aus der Dropdown-Liste aus.
+. Klicken Sie Auf *Neu*.
+. Geben Sie auf der Seite Name den Namen und die Beschreibung der Richtlinie ein.
+. Geben Sie die Zeitplanhäufigkeit an, indem Sie *on Demand*, *hourly*, *Daily*, *Weekly* oder *Monthly* auswählen.
+. Geben Sie auf der Seite Aufbewahrung die Aufbewahrungseinstellungen für den Sicherungstyp und den auf der Seite Sicherungstyp ausgewählten Terminplantyp an:
++
+|===
+
+
+| Ihr Ziel ist | Dann... 
+
+
+ a| 
+Behalten Sie eine bestimmte Anzahl von Snapshots bei
+ a| 
+Wählen Sie *Total Snapshot Copies to keep* aus, und geben Sie dann die Anzahl der Snapshots an, die Sie behalten möchten.
+
+Wenn die Anzahl der Snapshots die angegebene Zahl überschreitet, werden die Snapshots mit den ältesten zuerst gelöschten Kopien gelöscht.
+
+
+NOTE: Der maximale Aufbewahrungswert ist 1018 für Ressourcen auf ONTAP 9.4 oder höher und 254 für Ressourcen unter ONTAP 9.3 oder einer früheren Version. Backups schlagen fehl, wenn die Aufbewahrung auf einen Wert festgelegt ist, der höher ist, als die zugrunde liegende ONTAP Version unterstützt.
+
+
+IMPORTANT: Sie müssen die Aufbewahrungsanzahl auf 2 oder höher einstellen, wenn Sie die SnapVault-Replikation aktivieren möchten. Wenn Sie den Aufbewahrungszeitraum auf 1 festlegen, kann der Aufbewahrungsvorgang fehlschlagen, weil der erste Snapshot der ReferenzSnapshot für die SnapVault-Beziehung ist, bis ein neuerer Snapshot auf das Ziel repliziert wird.
+
+
+
+ a| 
+Bewahren Sie die Snapshots für eine bestimmte Anzahl von Tagen auf
+ a| 
+Wählen Sie *Snapshot-Kopien behalten für*, und geben Sie dann die Anzahl der Tage an, für die Sie die Snapshots vor dem Löschen behalten möchten.
+
+|===
++
+
+NOTE: Sie können Archiv-Protokoll-Backups nur dann aufbewahren, wenn Sie die Archiv-Log-Dateien als Teil Ihrer Sicherung ausgewählt haben.
+
+. Geben Sie auf der Seite Replikation die Replikationseinstellungen an:
++
+|===
+| Für dieses Feld... | Tun Sie das... 
+
+
+ a| 
+Aktualisieren Sie SnapMirror nach dem Erstellen einer lokalen Snapshot Kopie
+ a| 
+Wählen Sie dieses Feld aus, um Spiegelkopien der Backup-Sätze auf einem anderen Volume zu erstellen (SnapMirror Replikation).
+
+Diese Option sollte für SnapMirror Active Sync aktiviert sein.
+
+
+
+ a| 
+Aktualisieren Sie SnapVault nach dem Erstellen einer lokalen Snapshot Kopie
+ a| 
+Wählen Sie diese Option aus, um Disk-to-Disk-Backup-Replikation (SnapVault-Backups) durchzuführen.
+
+
+
+ a| 
+Sekundäres Policy-Label
+ a| 
+Wählen Sie eine Snapshot-Bezeichnung aus.
+
+Je nach der ausgewählten Snapshot-Beschriftung wendet ONTAP die sekundäre Snapshot-Aufbewahrungsrichtlinie an, die der Markierung entspricht.
+
+
+NOTE: Wenn Sie *Update SnapMirror nach dem Erstellen einer lokalen Snapshot Kopie* ausgewählt haben, können Sie optional das Label für die sekundäre Richtlinie angeben. Wenn Sie jedoch *Update SnapVault nach dem Erstellen einer lokalen Snapshot Kopie* ausgewählt haben, sollten Sie das sekundäre Policy Label angeben.
+
+
+
+ a| 
+Fehler bei Wiederholungszählung
+ a| 
+Geben Sie die maximale Anzahl von Replikationsversuchen ein, die zulässig sind, bevor der Vorgang beendet wird.
+
+|===
++
+
+NOTE: Sie sollten die SnapMirror Aufbewahrungsrichtlinie in ONTAP für den sekundären Storage konfigurieren, um die maximale Grenze von Snapshots auf dem sekundären Storage zu vermeiden.
+
+. Geben Sie auf der Seite Skript den Pfad und die Argumente des Prescript oder Postscript ein, das Sie vor oder nach dem Backup ausführen möchten.
++
+
+NOTE: Sie sollten überprüfen, ob die Befehle in der Befehlsliste vorhanden sind, die auf dem Plug-in-Host verfügbar ist, über den Pfad _ /opt/NetApp/SnapCenter/scc/etc/allowed_commands.config_.
+
++
+Sie können auch den Wert für das Skript-Timeout angeben. Der Standardwert ist 60 Sekunden.
+
+. Überprüfen Sie die Zusammenfassung und klicken Sie dann auf *Fertig stellen*.
+

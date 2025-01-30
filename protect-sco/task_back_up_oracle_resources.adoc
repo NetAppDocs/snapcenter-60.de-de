@@ -1,0 +1,123 @@
+---
+permalink: protect-sco/task_back_up_oracle_resources.html 
+sidebar: sidebar 
+keywords: backup, Oracle database, policy, schedule, verification, resources 
+summary: Wenn eine Ressource nicht zu einer Ressourcengruppe gehört, können Sie die Ressource auf der Seite Ressourcen sichern. 
+---
+= Oracle-Ressourcen sichern
+:allow-uri-read: 
+:icons: font
+:imagesdir: ../media/
+
+
+[role="lead"]
+Wenn eine Ressource nicht zu einer Ressourcengruppe gehört, können Sie die Ressource auf der Seite Ressourcen sichern.
+
+.Schritte
+. Wählen Sie im linken Navigationsbereich *Ressourcen* und das entsprechende Plug-in aus der Liste aus.
+. Wählen Sie auf der Seite Ressourcen in der Liste Ansicht die Option *Datenbank* aus.
+. Klicken Sie auf image:../media/filter_icon.png["Filtersymbol"], und wählen Sie dann den Hostnamen und den Datenbanktyp aus, um die Ressourcen zu filtern.
++
+Sie können dann klicken image:../media/filter_icon.png["Filtersymbol"] , um den Filterbereich zu schließen.
+
+. Wählen Sie die Datenbank aus, die Sie sichern möchten.
++
+Die Seite Datenbankschutz wird angezeigt.
+
+. Auf der Seite „Ressourcen“ können Sie die folgenden Schritte ausführen:
++
+.. Aktivieren Sie das Kontrollkästchen, und geben Sie ein benutzerdefiniertes Namensformat ein, das für den Snapshot-Namen verwendet werden soll.
++
+Zum Beispiel, `customtext_policy_hostname` oder `resource_hostname`. Standardmäßig wird ein Zeitstempel an den Snapshot Namen angehängt.
+
+.. Geben Sie die Ziele der Archivprotokolldateien an, die Sie nicht sichern möchten.
+
+
+. Führen Sie auf der Seite Richtlinien die folgenden Schritte aus:
++
+.. Wählen Sie eine oder mehrere Richtlinien aus der Dropdown-Liste aus.
++
+
+NOTE: Sie können eine Richtlinie erstellen, indem Sie auf klicken image:../media/add_policy_from_resourcegroup.gif["Symbol hinzufügen"].
+
++
+Im Abschnitt „Zeitpläne für ausgewählte Richtlinien konfigurieren“ werden die ausgewählten Richtlinien aufgelistet.
+
+.. Klicken Sie in der Spalte Zeitpläne konfigurieren auf image:../media/add_policy_from_resourcegroup.gif["Symbol hinzufügen"] , um einen Zeitplan für die gewünschte Richtlinie zu konfigurieren.
+.. Konfigurieren Sie im Fenster Add Schedules for Policy _Policy_Name_ den Zeitplan, und wählen Sie dann `OK`.
++
+_Policy_Name_ ist der Name der von Ihnen ausgewählten Richtlinie.
+
++
+Die konfigurierten Zeitpläne sind in der Spalte angewendete Zeitpläne aufgeführt.
+
+
+
+. Führen Sie auf der Seite Überprüfung die folgenden Schritte aus:
++
+.. Klicken Sie auf *Load Locators*, um die SnapMirror- oder SnapVault-Volumes zu laden, um den sekundären Speicher zu überprüfen.
+.. Klicken Sie in der Spalte Zeitpläne konfigurieren auf image:../media/add_policy_from_resourcegroup.gif["Symbol hinzufügen"] , um den Überprüfungsplan für alle Zeitplantypen der Richtlinie zu konfigurieren. + im Dialogfeld Überprüfungszeitpläne hinzufügen _Policy_Name_ können Sie die folgenden Schritte ausführen:
+.. Wählen Sie *Überprüfung nach Sicherung ausführen*.
+.. Wählen Sie *geplante Überprüfung ausführen*, und wählen Sie den Zeitplantyp aus der Dropdown-Liste aus.
++
+
+NOTE: In einem Flex ASM-Setup können Sie auf Leaf-Knoten keine Verifizierungsvorgang durchführen, wenn die Kardinalität kleiner als die Anzahl der Knoten im RAC-Cluster ist.
+
+.. Wählen Sie *am sekundären Standort überprüfen*, um Ihre Backups auf dem sekundären Speicher zu überprüfen.
+.. Klicken Sie auf *OK*.
++
+Die konfigurierten Überprüfungszeitpläne sind in der Spalte „angewendete Zeitpläne“ aufgeführt.
+
+
+
+. Wählen Sie auf der Benachrichtigungsseite aus der Dropdown-Liste *E-Mail-Präferenz* die Szenarien aus, in denen Sie die E-Mails senden möchten.
++
+Sie müssen die E-Mail-Adressen von Absender und Empfänger sowie den Betreff der E-Mail angeben. Wenn Sie den Bericht des auf der Ressource durchgeführten Sicherungsvorgangs anhängen möchten, wählen Sie *Job-Bericht anhängen*.
+
++
+
+NOTE: Für E-Mail-Benachrichtigungen müssen Sie die SMTP-Serverdetails entweder über die GUI oder über den PowerShell-Befehl angegeben haben `Set-SmSmtpServer`.
+
+. Überprüfen Sie die Zusammenfassung und klicken Sie dann auf *Fertig stellen*.
++
+Die Seite der Datenbanktopologie wird angezeigt.
+
+. Klicken Sie auf *Jetzt sichern*.
+. Führen Sie auf der Seite Backup die folgenden Schritte aus:
++
+.. Wenn Sie mehrere Richtlinien auf die Ressource angewendet haben, wählen Sie aus der Dropdown-Liste Richtlinie die Richtlinie aus, die Sie für das Backup verwenden möchten.
++
+Wenn die für das On-Demand-Backup ausgewählte Richtlinie einem Backup-Zeitplan zugeordnet ist, werden die On-Demand-Backups auf Basis der für den Zeitplantyp festgelegten Aufbewahrungseinstellungen beibehalten.
+
+.. Klicken Sie Auf *Backup*.
+
+
+. Überwachen Sie den Fortschritt des Vorgangs, indem Sie auf *Monitor* > *Jobs* klicken.
+
+
+.Nachdem Sie fertig sind
+* Im AIX-Setup können Sie mit dem `lkdev` Befehl zum Sperren und mit dem `rendev` Befehl die Festplatten umbenennen, auf denen sich die gesicherte Datenbank befand.
++
+Das Sperren oder Umbenennen von Geräten hat keine Auswirkungen auf den Wiederherstellungsvorgang, wenn Sie die Wiederherstellung mit diesem Backup durchführen.
+
+* Wenn der Sicherungsvorgang fehlschlägt, weil die Ausführungszeit der Datenbankabfrage den Timeout-Wert überschritten hat, sollten Sie den Wert der Parameter ORACLE_SQL_QUERY_TIMEOUT und ORACLE_PLUGIN_SQL_QUERY_TIMEOUT ändern, indem Sie das Cmdlet ausführen `Set-SmConfigSettings` :
++
+Nachdem Sie den Wert der Parameter geändert haben, starten Sie den Dienst SnapCenter Plug-in Loader (SPL) neu, indem Sie den folgenden Befehl ausführen `/opt/NetApp/snapcenter/spl/bin/spl restart`
+
+* Wenn die Datei nicht zugänglich ist und der Mount-Punkt während des Verifizierungsvorgangs nicht verfügbar ist, kann der Vorgang mit dem Fehlercode DBV-00100 der angegebenen Datei fehlschlagen. Sie sollten die Werte der Parameter VERIFICATION_DELAY und VERIFICATION_RETRY_COUNT in sco.properties ändern.
++
+Nachdem Sie den Wert der Parameter geändert haben, starten Sie den Dienst SnapCenter Plug-in Loader (SPL) neu, indem Sie den folgenden Befehl ausführen `/opt/NetApp/snapcenter/spl/bin/spl restart`
+
+* In MetroCluster-Konfigurationen kann SnapCenter nach einem Failover möglicherweise keine Sicherungsbeziehung erkennen.
+* Wenn Sie Anwendungsdaten auf VMDKs sichern und die Java Heap-Größe für das SnapCenter-Plug-in für VMware vSphere nicht groß genug ist, kann die Sicherung fehlschlagen.
++
+Um die Java-Heap-Größe zu erhöhen, suchen Sie nach der Skriptdatei _/opt/netapp/init_scripts/scvservice_. In diesem Skript startet der `do_start method` Befehl den SnapCenter VMware Plug-in-Service. Aktualisieren Sie diesen Befehl auf Folgendes: `Java -jar -Xmx8192M -Xms4096M`.
+
+
+
+.Weitere Informationen
+* https://kb.netapp.com/Advice_and_Troubleshooting/Data_Protection_and_Security/SnapCenter/Unable_to_detect_SnapMirror_or_SnapVault_relationship_after_MetroCluster_failover["SnapMirror oder SnapVault-Beziehung kann nach MetroCluster Failover nicht erkannt werden"^]
+* https://kb.netapp.com/Advice_and_Troubleshooting/Data_Protection_and_Security/SnapCenter/Oracle_RAC_One_Node_database_is_skipped_for_performing_SnapCenter_operations["Oracle RAC One-Knoten-Datenbank wird zur Durchführung von SnapCenter-Operationen übersprungen"^]
+* https://kb.netapp.com/Advice_and_Troubleshooting/Data_Protection_and_Security/SnapCenter/Failed_to_change_the_state_of_an_Oracle_12c_ASM_database_from_shutdown_to_mount["Fehler beim Ändern des Status einer Oracle 12c ASM-Datenbank"^]
+* https://kb.netapp.com/Advice_and_Troubleshooting/Data_Protection_and_Security/SnapCenter/What_are_the_customizable_parameters_for_backup_restore_and_clone_operations_on_AIX_systems["Anpassbare Parameter für Backup-, Wiederherstellungs- und Klonvorgänge auf AIX-Systemen"^] (Anmeldung erforderlich)
+
