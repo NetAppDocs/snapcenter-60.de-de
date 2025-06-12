@@ -77,11 +77,9 @@ Die Details zu Backups und Klonen werden in einem Tabellenformat angezeigt.
 
 NOTE: Sie können Backups, die sich auf dem sekundären Speichersystem befinden, nicht umbenennen oder löschen.
 
-+
-Wenn Sie benutzerdefinierte SnapCenter-Plug-ins verwenden, können Sie die Backups, die sich auf dem primären Speichersystem befinden, nicht umbenennen.
-
 . Wenn Sie einen Klon löschen möchten, wählen Sie den Klon in der Tabelle aus und klicken Sie auf image:../media/delete_icon.gif["Symbol Löschen"] , um ihn zu löschen.
 
 
-.Beispiel für Backups und Klone auf dem Primärspeicher
+*Beispiel für Backups und Klone auf dem primären Speicher*
+
 image:../media/topology_backups_and_clones_primary_storage.gif["Topologieansicht von Backup und Klonen im primären Storage"]

@@ -63,10 +63,6 @@ SnapCenter bietet folgende Berechtigungen:
 * Dashboard
 * Berichte An
 * Wiederherstellen
-+
-** Vollständige Volume-Wiederherstellung (nur bei benutzerdefinierten Plug-ins)
-
-
 * Ressource
 +
 Für nicht-Administratoren sind vom Administrator Plug-in-Berechtigungen erforderlich, um eine Ressourcenerkennung durchzuführen.
