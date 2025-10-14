@@ -37,7 +37,7 @@ In der folgenden Tabelle werden die verschiedenen Ports und ihre Standardwerte a
 
 
  a| 
-SnapCenter-Port
+SnapCenter -Webport
  a| 
 8146 (HTTPS), bidirektional, anpassbar, wie in der URL _\https://server:8146_
 
