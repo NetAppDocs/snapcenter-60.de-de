@@ -26,5 +26,3 @@ Außerdem können Sie PowerShell Cmdlets manuell oder in Skripten verwenden, um 
 link:task_clone_from_a_sql_server_database_backup.html["Klonen aus einem Backup der SQL Server Datenbank"]
 
 link:task_perform_clone_lifecycle_management.html["Führen Sie Den Klon-Lebenszyklus Durch"]
-
-link:https://kb.netapp.com/Advice_and_Troubleshooting/Data_Protection_and_Security/SnapCenter/Clone_operation_might_fail_or_take_longer_time_to_complete_with_default_TCP_TIMEOUT_value["Der Klonvorgang kann fehlschlagen oder längere Zeit zum Abschließen mit dem Standardwert für TCP_TIMEOUT benötigen"]
